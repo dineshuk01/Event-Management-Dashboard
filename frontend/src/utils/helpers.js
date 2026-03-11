@@ -14,16 +14,11 @@ export const getEventDateLabel = (date) => {
 
 export const getCategoryColor = (category) => {
   const colors = {
-    conference: 'bg-blue-500/10 text-blue-400 border border-blue-500/20',
-    workshop: 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20',
-    webinar: 'bg-violet-500/10 text-violet-400 border border-violet-500/20',
-    meetup: 'bg-amber-500/10 text-amber-400 border border-amber-500/20',
-    concert: 'bg-pink-500/10 text-pink-400 border border-pink-500/20',
-    sports: 'bg-orange-500/10 text-orange-400 border border-orange-500/20',
-    networking: 'bg-sky-500/10 text-sky-400 border border-sky-500/20',
-    other: 'bg-zinc-500/10 text-zinc-400 border border-zinc-500/20',
+    'in-person': 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20',
+    'online': 'bg-sky-500/10 text-sky-400 border border-sky-500/20',
+    'workshop': 'bg-violet-500/10 text-violet-400 border border-violet-500/20',
   }
-  return colors[category] || colors.other
+  return colors[category] || 'bg-zinc-500/10 text-zinc-400 border border-zinc-500/20'
 }
 
 export const getStatusColor = (status) => {
@@ -56,18 +51,14 @@ export const formatPrice = (price, currency = 'USD') => {
 }
 
 export const CATEGORIES = [
-  { value: 'all', label: 'All Categories' },
-  { value: 'conference', label: '🎤 Conference' },
+  { value: 'all', label: 'All' },
+  { value: 'in-person', label: '📍 In-Person' },
+  { value: 'online', label: '💻 Online' },
   { value: 'workshop', label: '🛠 Workshop' },
-  { value: 'webinar', label: '💻 Webinar' },
-  { value: 'meetup', label: '🤝 Meetup' },
-  { value: 'concert', label: '🎵 Concert' },
-  { value: 'sports', label: '⚽ Sports' },
-  { value: 'networking', label: '🔗 Networking' },
-  { value: 'other', label: '✨ Other' },
 ]
 
 export const CATEGORY_EMOJIS = {
-  conference: '🎤', workshop: '🛠', webinar: '💻', meetup: '🤝',
-  concert: '🎵', sports: '⚽', networking: '🔗', other: '✨'
+  'in-person': '📍',
+  'online': '💻',
+  'workshop': '🛠',
 }

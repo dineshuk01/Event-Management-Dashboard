@@ -48,7 +48,7 @@ const seed = async () => {
     {
       title: 'React & AI Summit 2025',
       description: 'Join us for the premier React and AI conference of the year. Featuring talks from industry leaders, hands-on workshops, and networking opportunities. Explore the intersection of modern web development and artificial intelligence.',
-      category: 'conference',
+      category: 'in-person',
       organizer: organizer._id,
       date: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000),
       endDate: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000 + 8 * 60 * 60 * 1000),
@@ -87,7 +87,7 @@ const seed = async () => {
     {
       title: 'Product Design Meetup',
       description: 'Monthly gathering of product designers, UX researchers, and design leaders. Share your work, get feedback, and connect with the local design community.',
-      category: 'meetup',
+      category: 'in-person',
       organizer: organizer._id,
       date: new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000),
       location: { type: 'physical', city: 'Austin', country: 'USA', address: '200 Congress Ave' },
@@ -102,7 +102,7 @@ const seed = async () => {
     {
       title: 'Startup Networking Night',
       description: 'Connect with founders, investors, and startup enthusiasts in this casual evening networking event. Drinks, great conversations, and potential collaborations await.',
-      category: 'networking',
+      category: 'in-person',
       organizer: organizer._id,
       date: new Date(now.getTime() + 10 * 24 * 60 * 60 * 1000),
       location: { type: 'physical', city: 'Seattle', country: 'USA', address: '1301 5th Ave' },
@@ -117,7 +117,7 @@ const seed = async () => {
     {
       title: 'Web3 & Blockchain Webinar',
       description: 'Online webinar exploring the latest in Web3, DeFi, and blockchain technology. Hear from experts building the decentralized web.',
-      category: 'webinar',
+      category: 'online',
       organizer: organizer._id,
       date: new Date(now.getTime() + 2 * 24 * 60 * 60 * 1000),
       location: { type: 'online', onlineLink: 'https://zoom.us/j/demo2' },
@@ -132,8 +132,6 @@ const seed = async () => {
       title: 'Cloud Architecture Deep Dive',
       description: 'A draft event for future planning.',
       category: 'workshop',
-      organizer: organizer._id,
-      date: new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000),
       location: { type: 'physical', city: 'Chicago', country: 'USA' },
       capacity: 60,
       registrationCount: 0,

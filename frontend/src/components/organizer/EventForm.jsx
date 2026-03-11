@@ -1,37 +1,40 @@
 import { useState } from 'react'
-import { Calendar, MapPin, Users, DollarSign, Tag, Plus, Trash2, Image } from 'lucide-react'
+import { MapPin, Monitor, Wrench } from 'lucide-react'
+
+const CATEGORIES = [
+  { value: 'in-person', label: 'In-Person', icon: MapPin, desc: 'Physical venue' },
+  { value: 'online', label: 'Online', icon: Monitor, desc: 'Virtual / livestream' },
+  { value: 'workshop', label: 'Workshop', icon: Wrench, desc: 'Hands-on learning' },
+]
 
 const defaultForm = {
-  title: '', description: '', category: 'conference', status: 'draft',
-  date: '', endDate: '', registrationDeadline: '',
-  location: { type: 'physical', address: '', city: '', country: '', onlineLink: '' },
-  capacity: 100, price: 0, currency: 'USD', image: '', tags: [], isFeatured: false,
-  agenda: []
+  title: '',
+  description: '',
+  category: 'in-person',
+  date: '',
+  endDate: '',
+  registrationDeadline: '',
+  location: { type: 'physical', city: '', onlineLink: '' },
+  capacity: 50,
+  price: 0,
+  currency: 'USD',
+  status: 'published',
+  image: '',
+  tags: [],
+  isFeatured: false,
+  agenda: [],
 }
 
-export default function EventForm({ initialData = {}, onSubmit, isLoading, submitLabel = 'Save Event' }) {
+export default function EventForm({ initialData = {}, onSubmit, isLoading, submitLabel = 'Create Event' }) {
   const [form, setForm] = useState({ ...defaultForm, ...initialData })
-  const [tagInput, setTagInput] = useState('')
 
   const set = (field, value) => setForm(prev => ({ ...prev, [field]: value }))
   const setLocation = (field, value) => setForm(prev => ({ ...prev, location: { ...prev.location, [field]: value } }))
-  
-  const addTag = () => {
-    const t = tagInput.trim().toLowerCase()
-    if (t && !form.tags.includes(t)) {
-      set('tags', [...form.tags, t])
-    }
-    setTagInput('')
-  }
 
-  const addAgendaItem = () => {
-    set('agenda', [...form.agenda, { time: '', title: '', description: '', speaker: '' }])
-  }
-
-  const updateAgenda = (i, field, value) => {
-    const updated = [...form.agenda]
-    updated[i] = { ...updated[i], [field]: value }
-    set('agenda', updated)
+  const handleCategoryChange = (cat) => {
+    set('category', cat)
+    if (cat === 'online') setLocation('type', 'online')
+    else setLocation('type', 'physical')
   }
 
   const handleSubmit = (e) => {
@@ -45,208 +48,235 @@ export default function EventForm({ initialData = {}, onSubmit, isLoading, submi
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8">
-      {/* Basic Info */}
+    <form onSubmit={handleSubmit} className="space-y-6">
+
+      {/* Step 1 */}
       <div className="card p-6 space-y-5">
-        <h2 className="section-title">Basic Information</h2>
-        
-        <div>
-          <label className="label">Event Title *</label>
-          <input type="text" value={form.title} onChange={e => set('title', e.target.value)} className="input" placeholder="Give your event a compelling title" required maxLength={100} />
+        <div className="flex items-center gap-3 mb-1">
+          <div className="w-7 h-7 rounded-full bg-sky-500/20 text-sky-400 flex items-center justify-center text-sm font-bold">1</div>
+          <h2 className="section-title">What's your event?</h2>
         </div>
 
         <div>
-          <label className="label">Description *</label>
-          <textarea value={form.description} onChange={e => set('description', e.target.value)} className="input resize-none" rows={5} placeholder="Describe your event in detail..." required maxLength={2000} />
-          <p className="text-xs text-zinc-600 mt-1">{form.description.length}/2000</p>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label className="label">Category *</label>
-            <select value={form.category} onChange={e => set('category', e.target.value)} className="input">
-              {['conference', 'workshop', 'webinar', 'meetup', 'concert', 'sports', 'networking', 'other'].map(c => (
-                <option key={c} value={c}>{c.charAt(0).toUpperCase() + c.slice(1)}</option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="label">Status</label>
-            <select value={form.status} onChange={e => set('status', e.target.value)} className="input">
-              {['draft', 'published', 'cancelled'].map(s => (
-                <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        <div>
-          <label className="label">Image URL</label>
-          <input type="url" value={form.image} onChange={e => set('image', e.target.value)} className="input" placeholder="https://..." />
-          {form.image && <img src={form.image} alt="preview" className="mt-3 h-32 w-full object-cover rounded-xl border border-zinc-700" onError={e => e.target.style.display='none'} />}
-        </div>
-
-        <div className="flex items-center gap-3">
-          <input type="checkbox" id="featured" checked={form.isFeatured} onChange={e => set('isFeatured', e.target.checked)} className="w-4 h-4 rounded accent-sky-500" />
-          <label htmlFor="featured" className="text-sm text-zinc-400 cursor-pointer">Mark as featured event</label>
-        </div>
-      </div>
-
-      {/* Date & Time */}
-      <div className="card p-6 space-y-5">
-        <h2 className="section-title flex items-center gap-2"><Calendar size={16} /> Date & Time</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div>
-            <label className="label">Start Date & Time *</label>
-            <input type="datetime-local" value={toLocalInput(form.date)} onChange={e => set('date', e.target.value)} className="input" required />
-          </div>
-          <div>
-            <label className="label">End Date & Time</label>
-            <input type="datetime-local" value={toLocalInput(form.endDate)} onChange={e => set('endDate', e.target.value)} className="input" />
-          </div>
-          <div>
-            <label className="label">Registration Deadline</label>
-            <input type="datetime-local" value={toLocalInput(form.registrationDeadline)} onChange={e => set('registrationDeadline', e.target.value)} className="input" />
-          </div>
-        </div>
-      </div>
-
-      {/* Location */}
-      <div className="card p-6 space-y-5">
-        <h2 className="section-title flex items-center gap-2"><MapPin size={16} /> Location</h2>
-        <div>
-          <label className="label">Event Type</label>
-          <div className="flex gap-3">
-            {['physical', 'online', 'hybrid'].map(t => (
+          <label className="label">Type of event</label>
+          <div className="grid grid-cols-3 gap-3">
+            {CATEGORIES.map(({ value, label, icon: Icon, desc }) => (
               <button
-                key={t}
+                key={value}
                 type="button"
-                onClick={() => setLocation('type', t)}
-                className={`flex-1 py-2.5 rounded-xl text-sm font-medium capitalize transition-all ${form.location.type === t ? 'bg-sky-500 text-white' : 'bg-zinc-800 text-zinc-400 hover:text-zinc-200'}`}
+                onClick={() => handleCategoryChange(value)}
+                className={`p-4 rounded-xl border-2 text-left transition-all duration-150 ${
+                  form.category === value
+                    ? 'border-sky-500 bg-sky-500/10'
+                    : 'border-zinc-700 hover:border-zinc-600 bg-zinc-800/40'
+                }`}
               >
-                {t}
+                <Icon size={20} className={form.category === value ? 'text-sky-400' : 'text-zinc-500'} />
+                <p className={`font-semibold text-sm mt-2 ${form.category === value ? 'text-zinc-100' : 'text-zinc-400'}`}>{label}</p>
+                <p className="text-xs text-zinc-600 mt-0.5">{desc}</p>
               </button>
             ))}
           </div>
         </div>
 
-        {(form.location.type === 'physical' || form.location.type === 'hybrid') && (
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="sm:col-span-1">
-              <label className="label">City</label>
-              <input type="text" value={form.location.city} onChange={e => setLocation('city', e.target.value)} className="input" placeholder="New York" />
-            </div>
-            <div>
-              <label className="label">Country</label>
-              <input type="text" value={form.location.country} onChange={e => setLocation('country', e.target.value)} className="input" placeholder="USA" />
-            </div>
-            <div className="sm:col-span-1">
-              <label className="label">Address</label>
-              <input type="text" value={form.location.address} onChange={e => setLocation('address', e.target.value)} className="input" placeholder="123 Main St" />
-            </div>
-          </div>
-        )}
-
-        {(form.location.type === 'online' || form.location.type === 'hybrid') && (
-          <div>
-            <label className="label">Online Link</label>
-            <input type="url" value={form.location.onlineLink} onChange={e => setLocation('onlineLink', e.target.value)} className="input" placeholder="https://zoom.us/j/..." />
-          </div>
-        )}
-      </div>
-
-      {/* Capacity & Pricing */}
-      <div className="card p-6 space-y-5">
-        <h2 className="section-title flex items-center gap-2"><Users size={16} /> Capacity & Pricing</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div>
-            <label className="label">Max Capacity *</label>
-            <input type="number" value={form.capacity} onChange={e => set('capacity', parseInt(e.target.value))} className="input" min={1} required />
-          </div>
-          <div>
-            <label className="label">Price</label>
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 text-sm">$</span>
-              <input type="number" value={form.price} onChange={e => set('price', parseFloat(e.target.value))} className="input pl-7" min={0} step={0.01} />
-            </div>
-          </div>
-          <div>
-            <label className="label">Currency</label>
-            <select value={form.currency} onChange={e => set('currency', e.target.value)} className="input">
-              {['USD', 'EUR', 'GBP', 'INR', 'CAD', 'AUD'].map(c => <option key={c} value={c}>{c}</option>)}
-            </select>
-          </div>
-        </div>
-      </div>
-
-      {/* Tags */}
-      <div className="card p-6 space-y-4">
-        <h2 className="section-title flex items-center gap-2"><Tag size={16} /> Tags</h2>
-        <div className="flex gap-2">
+        <div>
+          <label className="label">Event name <span className="text-red-400">*</span></label>
           <input
             type="text"
-            value={tagInput}
-            onChange={e => setTagInput(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addTag())}
-            className="input flex-1"
-            placeholder="Add a tag..."
+            value={form.title}
+            onChange={e => set('title', e.target.value)}
+            className="input"
+            placeholder="e.g. Morning Yoga Session, Tech Talk, Book Club"
+            required
+            maxLength={100}
           />
-          <button type="button" onClick={addTag} className="btn-secondary px-4">Add</button>
         </div>
-        {form.tags.length > 0 && (
-          <div className="flex flex-wrap gap-2">
-            {form.tags.map(tag => (
-              <span key={tag} className="badge bg-zinc-800 text-zinc-300 border border-zinc-700 gap-1">
-                #{tag}
-                <button type="button" onClick={() => set('tags', form.tags.filter(t => t !== tag))} className="text-zinc-500 hover:text-red-400 ml-1">×</button>
-              </span>
-            ))}
+
+        <div>
+          <label className="label">Description <span className="text-red-400">*</span></label>
+          <textarea
+            value={form.description}
+            onChange={e => set('description', e.target.value)}
+            className="input resize-none"
+            rows={4}
+            placeholder="Tell people what to expect — what will happen, who should come, what to bring..."
+            required
+            maxLength={2000}
+          />
+          <p className="text-xs text-zinc-600 mt-1">{form.description.length}/2000</p>
+        </div>
+      </div>
+
+      {/* Step 2 */}
+      <div className="card p-6 space-y-5">
+        <div className="flex items-center gap-3 mb-1">
+          <div className="w-7 h-7 rounded-full bg-sky-500/20 text-sky-400 flex items-center justify-center text-sm font-bold">2</div>
+          <h2 className="section-title">When & Where</h2>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className="label">Date & Time <span className="text-red-400">*</span></label>
+            <input
+              type="datetime-local"
+              value={toLocalInput(form.date)}
+              onChange={e => set('date', e.target.value)}
+              className="input"
+              required
+            />
+          </div>
+          <div>
+            <label className="label">End Time <span className="text-zinc-600 font-normal">(optional)</span></label>
+            <input
+              type="datetime-local"
+              value={toLocalInput(form.endDate)}
+              onChange={e => set('endDate', e.target.value)}
+              className="input"
+            />
+          </div>
+        </div>
+
+        {form.category !== 'online' ? (
+          <div>
+            <label className="label">City / Location</label>
+            <input
+              type="text"
+              value={form.location.city}
+              onChange={e => setLocation('city', e.target.value)}
+              className="input"
+              placeholder="e.g. New York, London, Mumbai"
+            />
+          </div>
+        ) : (
+          <div>
+            <label className="label">Meeting Link <span className="text-zinc-600 font-normal">(Zoom, Google Meet, etc.)</span></label>
+            <input
+              type="url"
+              value={form.location.onlineLink}
+              onChange={e => setLocation('onlineLink', e.target.value)}
+              className="input"
+              placeholder="https://zoom.us/j/..."
+            />
+            <p className="text-xs text-zinc-600 mt-1.5">Only registered attendees will see this link</p>
           </div>
         )}
       </div>
 
-      {/* Agenda */}
-      <div className="card p-6 space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="section-title">Agenda (optional)</h2>
-          <button type="button" onClick={addAgendaItem} className="btn-ghost text-sm flex items-center gap-1.5">
-            <Plus size={14} /> Add Item
-          </button>
+      {/* Step 3 */}
+      <div className="card p-6 space-y-5">
+        <div className="flex items-center gap-3 mb-1">
+          <div className="w-7 h-7 rounded-full bg-sky-500/20 text-sky-400 flex items-center justify-center text-sm font-bold">3</div>
+          <h2 className="section-title">Spots & Price</h2>
         </div>
-        {form.agenda.map((item, i) => (
-          <div key={i} className="p-4 bg-zinc-800/50 rounded-xl space-y-3 relative">
-            <button type="button" onClick={() => set('agenda', form.agenda.filter((_, idx) => idx !== i))} className="absolute top-3 right-3 text-zinc-600 hover:text-red-400 transition-colors">
-              <Trash2 size={14} />
-            </button>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="label text-xs">Time</label>
-                <input type="text" value={item.time} onChange={e => updateAgenda(i, 'time', e.target.value)} className="input text-sm" placeholder="9:00 AM" />
-              </div>
-              <div>
-                <label className="label text-xs">Speaker</label>
-                <input type="text" value={item.speaker} onChange={e => updateAgenda(i, 'speaker', e.target.value)} className="input text-sm" placeholder="Speaker name" />
-              </div>
-            </div>
-            <div>
-              <label className="label text-xs">Title</label>
-              <input type="text" value={item.title} onChange={e => updateAgenda(i, 'title', e.target.value)} className="input text-sm" placeholder="Session title" />
-            </div>
-            <div>
-              <label className="label text-xs">Description</label>
-              <input type="text" value={item.description} onChange={e => updateAgenda(i, 'description', e.target.value)} className="input text-sm" placeholder="Brief description" />
-            </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className="label">Max Attendees <span className="text-red-400">*</span></label>
+            <input
+              type="number"
+              value={form.capacity}
+              onChange={e => set('capacity', Math.max(1, parseInt(e.target.value) || 1))}
+              className="input"
+              min={1}
+              required
+            />
+            <p className="text-xs text-zinc-600 mt-1.5">How many people can join?</p>
           </div>
-        ))}
+          <div>
+            <label className="label">Ticket Price</label>
+            <div className="relative">
+              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500">$</span>
+              <input
+                type="number"
+                value={form.price}
+                onChange={e => set('price', Math.max(0, parseFloat(e.target.value) || 0))}
+                className="input pl-7"
+                min={0}
+                step={0.01}
+              />
+            </div>
+            <p className="text-xs text-zinc-600 mt-1.5">Set to 0 for a free event</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Step 4 — Optional */}
+      <div className="card p-6 space-y-5">
+        <div className="flex items-center gap-3 mb-1">
+          <div className="w-7 h-7 rounded-full bg-zinc-700 text-zinc-400 flex items-center justify-center text-sm font-bold">4</div>
+          <div>
+            <h2 className="section-title">Extra Details</h2>
+            <p className="text-xs text-zinc-600 mt-0.5">All optional</p>
+          </div>
+        </div>
+
+        <div>
+          <label className="label">Cover Image URL</label>
+          <input
+            type="url"
+            value={form.image}
+            onChange={e => set('image', e.target.value)}
+            className="input"
+            placeholder="https://images.unsplash.com/..."
+          />
+          {form.image && (
+            <img
+              src={form.image}
+              alt="preview"
+              className="mt-3 h-28 w-full object-cover rounded-xl border border-zinc-700"
+              onError={e => e.target.style.display = 'none'}
+            />
+          )}
+        </div>
+
+        <div>
+          <label className="label">Visibility</label>
+          <div className="flex gap-3">
+            {[
+              { value: 'published', label: '🌐 Publish now', desc: 'Visible to everyone' },
+              { value: 'draft', label: '📝 Save as draft', desc: 'Only you can see it' },
+            ].map(opt => (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => set('status', opt.value)}
+                className={`flex-1 p-3.5 rounded-xl border-2 text-left transition-all ${
+                  form.status === opt.value
+                    ? 'border-sky-500 bg-sky-500/10'
+                    : 'border-zinc-700 hover:border-zinc-600'
+                }`}
+              >
+                <p className={`text-sm font-semibold ${form.status === opt.value ? 'text-zinc-100' : 'text-zinc-400'}`}>{opt.label}</p>
+                <p className="text-xs text-zinc-600 mt-0.5">{opt.desc}</p>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <label className="flex items-center gap-3 cursor-pointer group">
+          <div
+            onClick={() => set('isFeatured', !form.isFeatured)}
+            className={`w-10 h-6 rounded-full transition-colors relative shrink-0 ${form.isFeatured ? 'bg-sky-500' : 'bg-zinc-700'}`}
+          >
+            <div className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-transform ${form.isFeatured ? 'translate-x-5' : 'translate-x-1'}`} />
+          </div>
+          <div>
+            <p className="text-sm font-medium text-zinc-300 group-hover:text-zinc-200">Feature this event</p>
+            <p className="text-xs text-zinc-600">Show at the top of the browse page</p>
+          </div>
+        </label>
       </div>
 
       {/* Submit */}
-      <div className="flex gap-3 justify-end pt-2">
-        <button type="button" onClick={() => window.history.back()} className="btn-secondary">Cancel</button>
-        <button type="submit" disabled={isLoading} className="btn-primary px-8">
+      <div className="flex gap-3 justify-end pt-1">
+        <button type="button" onClick={() => window.history.back()} className="btn-secondary">
+          Cancel
+        </button>
+        <button type="submit" disabled={isLoading} className="btn-primary px-10">
           {isLoading ? 'Saving...' : submitLabel}
         </button>
       </div>
+
     </form>
   )
 }

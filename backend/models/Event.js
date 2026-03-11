@@ -16,8 +16,8 @@ const eventSchema = new mongoose.Schema({
   category: {
     type: String,
     required: true,
-    enum: ['conference', 'workshop', 'webinar', 'meetup', 'concert', 'sports', 'networking', 'other'],
-    default: 'other'
+    enum: ['in-person', 'online', 'workshop'],
+    default: 'in-person'
   },
   organizer: {
     type: mongoose.Schema.Types.ObjectId,
