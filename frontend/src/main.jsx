@@ -1,3 +1,4 @@
+fetch(`${import.meta.env.VITE_API_URL}/api/health`).catch(() => {})
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
